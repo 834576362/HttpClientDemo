@@ -351,4 +351,90 @@ public class HttpClientDemo {
         }
     }
 
+    /**
+     * POST---有参（普通参数+对象参数）
+     */
+    @Test
+    public void doPostTestThree(){
+        //获得HTTP客户端
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        //创建Post请求
+        //参数
+        URI uri = null;
+        //将参数放入键值对类NameValuePair中，在放入集合
+        //List<NameValuePair> params = new ArrayList<>();
+        //params.add(new BasicNameValuePair("color","红色"));
+        //设置uri信息，并将参数集合放入uri
+        //注：这里也支持一个键值对的王往里面放addParameter(String key,String value);
+        try {
+            uri = new URIBuilder().setScheme("http")
+                    .setHost("localhost").setPort(8080).setPath("/doPostTestThree").
+                    addParameter("color","红色").
+                    addParameter("sex","男").build();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        //创建对象参数
+        User user = new User();
+        user.setAge(18);
+        user.setName("掌声在哪里");
+        //连接参数
+        RequestConfig config = RequestConfig.custom().
+                //设置请求超时时长（毫秒）
+                setConnectionRequestTimeout(5000).
+                //设置连接超时时长
+                setConnectTimeout(5000).
+                //设置读写超时时长
+                setSocketTimeout(5000).
+                //是否重定向
+                setRedirectsEnabled(true).build();
+
+
+        HttpPost httpPost = new HttpPost(uri);
+        httpPost.setHeader("Content-Type", "application/json;charset=utf8");
+        String s = JSON.toJSONString(user);
+        StringEntity stringEntity = new StringEntity(s,"UTF-8");
+        httpPost.setEntity(stringEntity);
+        httpPost.setConfig(config);
+
+        System.out.println("请求地址"+uri);
+
+        CloseableHttpResponse response =null;
+        try {
+            response =httpClient.execute(httpPost);
+            HttpEntity httpEntity = response.getEntity();
+            System.out.println("响应状态码："+response.getStatusLine().getStatusCode());
+            System.out.println("响应状态："+response.getStatusLine().getStatusCode());
+            if(httpClient != null){
+                System.out.println("响应长度："+httpEntity.getContentLength());
+                System.out.println("响应内容："+EntityUtils.toString(httpEntity));
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
