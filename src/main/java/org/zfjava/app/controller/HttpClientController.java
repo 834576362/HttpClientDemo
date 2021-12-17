@@ -1,10 +1,9 @@
 package org.zfjava.app.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.web.bind.annotation.*;
 import org.zfjava.app.dto.User;
+import org.zfjava.app.dto.dtojson.UserEnhance;
 
 /**
  * @auther zhangfen
@@ -47,4 +46,12 @@ public class HttpClientController {
         return user;
     }
 
+    //接收的时JSON字符串所以需要使用@RequestBody 来进行修复型参
+    @PostMapping("/doPostTestThree")
+    public UserEnhance doPostTestThree(@RequestParam("color")String c, String sex, @RequestBody User user){
+        System.out.println(user.toString());
+        System.out.println("性别"+sex);
+        System.out.println("颜色"+c);
+        return new  UserEnhance(sex,c,user);
+    }
 }
