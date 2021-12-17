@@ -2,6 +2,7 @@ package org.zfjava.app.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.zfjava.app.dto.User;
 
@@ -39,8 +40,9 @@ public class HttpClientController {
         return user;
     }
 
+    //接收的时JSON字符串所以需要使用@RequestBody 来进行修复型参
     @PostMapping("/doPostTestTwo")
-    public User doPostTestTwo(User user){
+    public User doPostTestTwo(@RequestBody User user){
         System.out.println(user.toString());
         return user;
     }
