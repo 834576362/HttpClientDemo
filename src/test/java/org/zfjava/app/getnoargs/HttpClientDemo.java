@@ -316,10 +316,6 @@ public class HttpClientDemo {
 
         // post请求是将参数放在请求体里面传过去的;这里将entity放入post请求体中
         httpPost.setEntity(entity);
-//        System.out.println("-------------------------");
-//        System.out.println(entity);
-//        System.out.println("-------------------------");
-
 
         //响应模型
         CloseableHttpResponse response = null;
