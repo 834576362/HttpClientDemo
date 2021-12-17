@@ -351,15 +351,4 @@ public class HttpClientDemo {
         }
     }
 
-
-
-
-    @Test
-    public void atomicDemo(){
-        AtomicInteger i1 = new AtomicInteger();
-        for(int i=0 ; i<100;i++){
-            i1.addAndGet(0);
-        }
-        System.out.println(i1);
-    }
 }
