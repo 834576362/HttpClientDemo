@@ -11,7 +11,9 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
@@ -19,11 +21,14 @@ import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.Test;
 import org.zfjava.app.dto.User;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -389,7 +394,6 @@ public class HttpClientDemo {
                 //是否重定向
                 setRedirectsEnabled(true).build();
 
-
         HttpPost httpPost = new HttpPost(uri);
         httpPost.setHeader("Content-Type", "application/json;charset=utf8");
         String s = JSON.toJSONString(user);
@@ -417,6 +421,67 @@ public class HttpClientDemo {
 
     }
 
+
+    /**
+     * 发送文件
+     *
+     * multipart/form-data传递文件(及相关信息)
+     *
+     * 注:如果想要灵活方便的传输文件的话，
+     *    除了引入org.apache.httpcomponents基本的httpclient依赖外
+     *    再额外引入org.apache.httpcomponents的httpmime依赖。
+     *    追注:即便不引入httpmime依赖，也是能传输文件的，不过功能不够强大。
+     *
+     */
+    @Test
+    public void test4() {
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpPost httpPost = new HttpPost("http://localhost:8080/file");
+        CloseableHttpResponse response = null;
+        try {
+            MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+            // 第一个文件
+            String filesKey = "files";
+            File file1 = new File("C:\\Users\\83457\\Pictures\\Camera Roll\\123r.jpg");
+            multipartEntityBuilder.addBinaryBody(filesKey, file1);
+            // 第二个文件(多个文件的话，使用同一个key就行，后端用数组或集合进行接收即可)
+            File file2 = new File("C:\\Users\\JustryDeng\\Desktop\\头像.jpg");
+            // 防止服务端收到的文件名乱码。 我们这里可以先将文件名URLEncode，然后服务端拿到文件名时在URLDecode。就能避免乱码问题。
+            // 文件名其实是放在请求头的Content-Disposition里面进行传输的，如其值为form-data; name="files"; filename="头像.jpg"
+            multipartEntityBuilder.addBinaryBody(filesKey, file2, ContentType.DEFAULT_BINARY, URLEncoder.encode(file2.getName(), "utf-8"));
+            // 其它参数(注:自定义contentType，设置UTF-8是为了防止服务端拿到的参数出现乱码)
+            ContentType contentType = ContentType.create("text/plain", Charset.forName("UTF-8"));
+            multipartEntityBuilder.addTextBody("name", "王五", contentType);
+            multipartEntityBuilder.addTextBody("age", "25", contentType);
+
+            HttpEntity httpEntity = multipartEntityBuilder.build();
+            httpPost.setEntity(httpEntity);
+
+            response = httpClient.execute(httpPost);
+            HttpEntity responseEntity = response.getEntity();
+            System.out.println("HTTPS响应状态为:" + response.getStatusLine());
+            if (responseEntity != null) {
+                System.out.println("HTTPS响应内容长度为:" + responseEntity.getContentLength());
+                // 主动设置编码，来防止响应乱码
+                String responseStr = EntityUtils.toString(responseEntity, StandardCharsets.UTF_8);
+                System.out.println("HTTPS响应内容为:" + responseStr);
+            }
+        } catch (ParseException | IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // 释放资源
+                if (httpClient != null) {
+                    httpClient.close();
+                }
+                if (response != null) {
+                    response.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 
 }
